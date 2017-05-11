@@ -8,7 +8,7 @@ Prepare the server to host your web applications.
 
 #### Publicly available URL
 
-`[http://ec2-54-210-157-61.compute-1.amazonaws.com/](http://ec2-54-210-157-61.compute-1.amazonaws.com/)`
+[http://ec2-54-210-157-61.compute-1.amazonaws.com/](http://ec2-54-210-157-61.compute-1.amazonaws.com/)
 
 ## Key Points
 
