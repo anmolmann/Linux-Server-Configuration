@@ -21,27 +21,34 @@ Prepare the server to host your web applications.
 * Updating all packages on the server
 	- sudo apt-get update 
 	- sudo apt-get upgrade
+
 * Update timezone
 	- sudo dpkg-reconfigure tzdata
+
 * Create a new user account named *"grader"*
 	- sudo adduser grader
 	- Install finger (if you want to)
 		- sudo apt-get install finger
 		- You can obtain info about *grader* by typing the command:
 			- *finger grader*
+
 * Give grader access
 	- give grader the permission to sudo
 	- *usermod -aG grader sudo*
+
 * Secure your server
 	- Change the SSH port from 22 to 2200.
 		- configure sshd_config file to change the port
 		- sudo nano /etc/ssh/sshd_config
 		- Also, change PermitRootLogin from prohibited-password to no
 		- sudo service ssh restart
+
 	- Make sure to configure the Lightsail firewall to allow it.
 		- Add 2200 to the available port in lightsail (in networking)
+
 	- Configure *Firewall*
 		- Configure the Uncomplicated Firewall (UFW) to only allow incoming connections for SSH (port 2200), HTTP (port 80), and NTP (port 123)
+			```sh
 			- sudo ufw status
 			- sudo ufw default deny incoming
 			- sudo ufw default allow outgoing
@@ -49,6 +56,8 @@ Prepare the server to host your web applications.
 			- sudo ufw allow 80/tcp
 			- sudo ufw allow 123/udp
 			- sudo ufw enable
+			```
+
 * When you change the SSH port, the Lightsail instance will no longer be accessible through the web app 'Connect using SSH' button. The button assumes the default port is being used.
 Instructions for connecting from your terminal to the instance.
 	- Download the key-pair for your instance from lightsail.
@@ -59,9 +68,11 @@ Instructions for connecting from your terminal to the instance.
 		- set Password Authentication to "yes" (which we'll change later)
 		- sudo service ssh restart
 	- ssh grader@54.210.157.61 -p 2200 -i *key-pair.pem*
+
 * Give grader access
 	- Give grader the permission to sudo
 		- sudo usermod -aG sudo grader
+
 	- Create an SSH key pair for grader using the ssh-keygen tool.
 		- On your local machine, generate SSH key pair with: ssh-keygen
 		- Save `*yourkeygen*` file in your ssh directory /c/Users/<usernam>/.ssh/ example full file path that could be used: /home/Users/<username>/.ssh/item-catalog
@@ -75,14 +86,19 @@ Instructions for connecting from your terminal to the instance.
 		- copy the key and paste in the file you just created in *grader* nano .ssh/authorized_keys
 		- Save file
 		- Set permissions of the .ssh directory and the authorized_keys file
+				```sh
 				- sudo chmod 700 .ssh
 				- sudo chmod 644 .ssh/authorized_keys
+				```
 				- Set Password Authentication to "no" (which we had changed earlier to yes)
+
 	- Login with key-pair
 		- `ssh grader@Public-IP-Address* -p 2200 -i ~/.ssh/keygen`
+
 * Prepare to deploy your project
 	- Install git.
 		- *sudo apt-get install git*
+
 	- Install and configure Apache to serve a Python mod_wsgi application.
 		- sudo apt-get install apache2
 		- install mod_wsgi
@@ -95,13 +111,16 @@ Instructions for connecting from your terminal to the instance.
 		- Install python dev and verify WSGI is enabled
 			- Install python-dev package: *sudo apt-get install python-dev*
 			- Verify wsgi is enabled: *sudo a2enmod wsgi*
+
 	- Install and configure PostgreSQL:
 		- Do not allow remote connections
 		- Create a new database user named catalog that has limited permissions to your catalog application database.
+
 * Deploy the Item Catalog project.
 	- Clone and setup your Item Catalog project from the Github repository
 	- Set it up in your server so that it functions correctly when visiting your server’s IP address in a browser. 
 	- Make sure that your .git directory is not publicly accessible via a browser
+
 	- Now, Clone Item Catalog project
 		- cd /var/www
 		- sudo mkdir catalog
@@ -109,7 +128,7 @@ Instructions for connecting from your terminal to the instance.
 		- git clone https://github.com/<your_project_path>/
 		- sudo *touch catalog.wsgi*
 			- Paste the following in catalog.wsgi file:
-			`
+			```js
 				#!/usr/bin/python
 				import sys
 				import logging
@@ -118,8 +137,10 @@ Instructions for connecting from your terminal to the instance.
 
 				from catalog import app as application
 				application.secret_key = 'Add your secret key'
-			`
+			```
+
 	- Install all the dependencies for Item Catalog project
+		```sh
 		- sudo apt-get -qqy install postgresql python-psycopg2
 		- sudo apt-get install python-pip
 		- sudo pip install requests
@@ -129,11 +150,13 @@ Instructions for connecting from your terminal to the instance.
 		- pip install werkzeug==0.8.3
 		- pip install flask==0.9
 		- pip install Flask-Login==0.1.3
+		```
+
 	- Configure & Enable New Virtual Host
 		- Create host config file
 			- *sudo nano /etc/apache2/sites-available/catalog.conf*
 			- And paste:
-				- `
+				- ```js
 					<VirtualHost *:80>
 					  ServerName 54.210.157.61
 					  ServerAdmin admin@54.210.157.61
@@ -151,10 +174,12 @@ Instructions for connecting from your terminal to the instance.
 					  LogLevel warn
 					  CustomLog ${APACHE_LOG_DIR}/access.log combined
 					</VirtualHost>
-				`
+				```
 			- save the file
 		- Enable *sudo a2ensite catalog*
+
 	- `sudo service apache2 restart`
+
 	- Install and setup PostgreSQL
 		- sudo apt-get install postgresql
 		- sudo -i -u postgres
@@ -172,9 +197,15 @@ Instructions for connecting from your terminal to the instance.
 		- Give accessto only catalog role
 			- *GRANT ALL ON SCHEMA public TO catalog;*
 		- exit
+
 	- Edit and config database_setup.py
+		```js
 		- sudo nano database_setup.py
 		- engine = create_engine('postgresql://catalog:catalog@localhost/catalog')
+		```
+
 	- Edit and config __init__.py
 		- sudo nano __init__.py
 		- engine = create_engine('postgresql://catalog:db-password@localhost/catalog')
+
+* Also, add the public IP address back into the Google Developer console and Facebook developer console
